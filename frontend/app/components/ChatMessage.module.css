@@ -38,15 +38,75 @@
 }
 
 .assistant {
-  background: white;
-  color: #333;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-container);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-bottom-left-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .messageContent {
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
+}
+
+.messageContent p {
+  margin: 0.5em 0;
+}
+
+.messageContent p:first-child {
+  margin-top: 0;
+}
+
+.messageContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Markdown styling */
+.paragraph {
+  margin: 0.5em 0;
+  line-height: 1.6;
+}
+
+.list {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.listItem {
+  margin: 0.25em 0;
+  line-height: 1.6;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.inlineCode {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.codeBlock {
+  display: block;
+  background: var(--code-block-bg);
+  color: var(--code-block-text);
+  padding: 12px;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+  line-height: 1.5;
 }
 
 .timestamp {
@@ -58,7 +118,7 @@
 
 .assistant .timestamp {
   text-align: left;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .user .timestamp {

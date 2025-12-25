@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
+import ThemeToggle from './components/ThemeToggle';
 import styles from './page.module.css';
 
 export interface Message {
@@ -18,8 +19,24 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = prefersDark ? 'dark' : 'light';
+      setTheme(initialTheme);
+      document.documentElement.setAttribute('data-theme', initialTheme);
+    }
+  }, []);
 
   // Load messages from localStorage on mount
   useEffect(() => {
@@ -38,7 +55,7 @@ export default function Home() {
       // Initial greeting
       const greeting: Message = {
         id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?",
+        text: "Hello! I'm your chat assistant. How can I help you today?\n\nYou can try:\n- `npm install` (markdown code example)\n- **Bold text**\n- *Italic text*",
         sender: 'assistant',
         timestamp: new Date()
       };
@@ -123,7 +140,7 @@ export default function Home() {
       // Reset with greeting
       const greeting: Message = {
         id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?",
+        text: "Hello! I'm your chat assistant. How can I help you today?\n\nYou can try:\n- `npm install` (markdown code example)\n- **Bold text**\n- *Italic text*",
         sender: 'assistant',
         timestamp: new Date()
       };
@@ -131,26 +148,43 @@ export default function Home() {
     }
   };
 
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
   return (
     <main className={styles.main}>
       <div className={styles.chatContainer} ref={chatContainerRef}>
         <div className={styles.chatHeader}>
           <h1 className={styles.title}>Chat Assistant</h1>
-          <button 
-            onClick={handleClearHistory}
-            className={styles.clearButton}
-            title="Clear chat history"
-          >
-            Clear
-          </button>
+          <div className={styles.headerActions}>
+            <ThemeToggle theme={theme} onToggle={handleThemeToggle} />
+            <button 
+              onClick={handleClearHistory}
+              className={styles.clearButton}
+              title="Clear chat history"
+              aria-label="Clear chat history"
+            >
+              Clear
+            </button>
+          </div>
         </div>
         
-        <div className={styles.messagesContainer}>
+        <div 
+          className={styles.messagesContainer}
+          role="log"
+          aria-label="Chat messages"
+          aria-live="polite"
+          aria-atomic="false"
+        >
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}
           {isLoading && <TypingIndicator />}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} aria-hidden="true" />
         </div>
 
         <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />

@@ -21,12 +21,34 @@ A simple web-based chat assistant with a conversational user interface built wit
 - ✅ Clear chat history functionality
 - ✅ Beautiful gradient UI design
 
+### Advanced Features 🚀
+- ✅ **Unit Testing**: Jest + React Testing Library
+  - Backend test for empty message error handling
+  - Frontend test for message appearing in DOM after send
+- ✅ **Markdown Support**: Full markdown rendering with `react-markdown`
+  - Inline code with syntax highlighting
+  - Code blocks
+  - Bold, italic, lists, and more
+- ✅ **Dark/Light Mode Toggle**: Theme switching with CSS variables
+  - System preference detection
+  - Persistent theme selection
+  - Smooth transitions
+- ✅ **Accessibility (A11y)**: WCAG compliant
+  - Proper ARIA labels and roles
+  - Keyboard navigation (Enter to send)
+  - High color contrast ratios
+  - Screen reader support
+  - Focus indicators
+- ✅ **Auto-Scroll**: Smooth scroll to bottom on new messages
+
 ## 🏗️ Tech Stack
 
 - **Frontend**: Next.js 14 (React 18) with TypeScript
 - **Backend**: Node.js & Express.js
-- **Styling**: CSS Modules with responsive design
+- **Styling**: CSS Modules with responsive design and CSS variables
 - **Storage**: localStorage for chat history persistence
+- **Testing**: Jest + React Testing Library + Supertest
+- **Markdown**: react-markdown for rich text rendering
 
 ## 📁 Project Structure
 
@@ -37,14 +59,22 @@ Chat-Assistant/
 │   │   ├── components/      # React components
 │   │   │   ├── ChatMessage.tsx
 │   │   │   ├── ChatInput.tsx
-│   │   │   └── TypingIndicator.tsx
+│   │   │   ├── TypingIndicator.tsx
+│   │   │   └── ThemeToggle.tsx
+│   │   ├── __tests__/       # Frontend tests
+│   │   │   └── Chat.test.tsx
 │   │   ├── layout.tsx       # Root layout
 │   │   ├── page.tsx         # Main chat page
-│   │   └── globals.css      # Global styles
+│   │   └── globals.css      # Global styles with CSS variables
+│   ├── jest.config.js       # Jest configuration
+│   ├── jest.setup.js        # Jest setup file
 │   ├── package.json
 │   └── next.config.js
 ├── backend/                  # Express.js backend API
+│   ├── __tests__/           # Backend tests
+│   │   └── server.test.js
 │   ├── server.js            # Main server file
+│   ├── jest.config.js       # Jest configuration
 │   └── package.json
 ├── package.json             # Root package.json with scripts
 └── README.md
@@ -174,9 +204,13 @@ npm run dev:frontend
 1. **Next.js App Router**: Used modern Next.js 14 with App Router for better performance and developer experience
 2. **TypeScript**: Type safety for better code quality and maintainability
 3. **CSS Modules**: Scoped styling to prevent conflicts
-4. **localStorage**: Simple client-side persistence without database complexity
-5. **Responsive Design**: Mobile-first approach with breakpoints for tablet and desktop
-6. **Animations**: Subtle animations enhance UX without being distracting
+4. **CSS Variables**: Used for theme switching (dark/light mode) with smooth transitions
+5. **localStorage**: Simple client-side persistence without database complexity
+6. **Responsive Design**: Mobile-first approach with breakpoints for tablet and desktop
+7. **Animations**: Subtle animations enhance UX without being distracting
+8. **Accessibility First**: WCAG compliant with proper ARIA labels, keyboard navigation, and high contrast ratios
+9. **Markdown Support**: Rich text rendering for better user experience with code examples
+10. **Testing**: Unit tests for critical functionality to ensure reliability
 
 ## 🌐 Deployment
 
@@ -216,7 +250,34 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 PORT=5000
 ```
 
-## 🧪 Testing the Application
+## 🧪 Testing
+
+### Running Tests
+
+**Frontend tests:**
+```bash
+cd frontend
+npm test
+```
+
+**Backend tests:**
+```bash
+cd backend
+npm test
+```
+
+**Watch mode (for development):**
+```bash
+cd frontend
+npm run test:watch
+```
+
+### Test Coverage
+
+- **Backend**: Tests for empty message error handling, valid message responses, and health check endpoint
+- **Frontend**: Tests for message rendering, Enter key submission, and empty input validation
+
+### Manual Testing
 
 1. Start the application: `npm run dev`
 2. Open `http://localhost:3000` in your browser
@@ -227,6 +288,11 @@ PORT=5000
    - "Help"
    - "Thank you"
    - "Goodbye"
+   - Try markdown: "Try `npm install` to install packages"
+   - Try **bold** and *italic* text
+4. Test dark mode toggle
+5. Test keyboard navigation (Enter to send)
+6. Test responsive design on different screen sizes
 
 ## 📝 API Documentation
 

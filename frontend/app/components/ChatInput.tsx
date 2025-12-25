@@ -50,7 +50,12 @@ export default function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
           className={styles.input}
           rows={1}
           disabled={disabled}
+          aria-label="Message input field. Type your message and press Enter to send."
+          aria-describedby="input-help"
         />
+        <span id="input-help" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', borderWidth: 0 }}>
+          Press Enter to send, Shift+Enter for new line
+        </span>
         <button
           onClick={handleSend}
           disabled={!input.trim() || disabled}
