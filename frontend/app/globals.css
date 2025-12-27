@@ -1,41 +1,43 @@
 :root {
-  /* Light theme colors */
-  --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Light theme colors - Light Green Theme */
+  --bg-primary: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
   --bg-container: #ffffff;
-  --bg-messages: #f8f9fa;
-  --text-primary: #333333;
-  --text-secondary: #666666;
+  --bg-messages: #f9fafb;
+  --text-primary: #166534;
+  --text-secondary: #15803d;
   --text-inverse: #ffffff;
-  --border-color: #e0e0e0;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --shadow-light: rgba(0, 0, 0, 0.1);
-  --scrollbar-track: #f1f1f1;
-  --scrollbar-thumb: #888888;
-  --scrollbar-thumb-hover: #555555;
-  --code-bg: #f4f4f4;
-  --code-text: #d14;
-  --code-block-bg: #2d2d2d;
-  --code-block-text: #f8f8f2;
+  --border-color: #86efac;
+  --shadow: rgba(34, 197, 94, 0.2);
+  --shadow-light: rgba(34, 197, 94, 0.1);
+  --scrollbar-track: #f0fdf4;
+  --scrollbar-thumb: #4ade80;
+  --scrollbar-thumb-hover: #22c55e;
+  --code-bg: #dcfce7;
+  --code-text: #15803d;
+  --code-block-bg: #f0fdf4;
+  --code-block-text: #166534;
+  --neon-glow: 0 0 10px rgba(34, 197, 94, 0.2), 0 0 20px rgba(34, 197, 94, 0.1);
 }
 
 [data-theme='dark'] {
-  /* Dark theme colors */
-  --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  --bg-container: #1e1e1e;
-  --bg-messages: #252525;
-  --text-primary: #e0e0e0;
-  --text-secondary: #b0b0b0;
-  --text-inverse: #ffffff;
-  --border-color: #404040;
-  --shadow: rgba(0, 0, 0, 0.5);
-  --shadow-light: rgba(0, 0, 0, 0.3);
-  --scrollbar-track: #2d2d2d;
-  --scrollbar-thumb: #555555;
-  --scrollbar-thumb-hover: #777777;
-  --code-bg: #3a3a3a;
-  --code-text: #ff6b6b;
-  --code-block-bg: #1e1e1e;
-  --code-block-text: #d4d4d4;
+  /* Dark theme colors - Green/Black AI Theme */
+  --bg-primary: linear-gradient(135deg, #000000 0%, #001a00 50%, #0a0a0a 100%);
+  --bg-container: #0a0a0a;
+  --bg-messages: #0f0f0f;
+  --text-primary: #00ff41;
+  --text-secondary: #39ff14;
+  --text-inverse: #00ff41;
+  --border-color: #00ff4130;
+  --shadow: rgba(0, 255, 65, 0.4);
+  --shadow-light: rgba(0, 255, 65, 0.3);
+  --scrollbar-track: #0a0a0a;
+  --scrollbar-thumb: #00ff41;
+  --scrollbar-thumb-hover: #39ff14;
+  --code-bg: #001a00;
+  --code-text: #00ff41;
+  --code-block-bg: #000000;
+  --code-block-text: #00ff41;
+  --neon-glow: 0 0 10px rgba(0, 255, 65, 0.6), 0 0 20px rgba(0, 255, 65, 0.4), 0 0 30px rgba(0, 255, 65, 0.3);
 }
 
 * {

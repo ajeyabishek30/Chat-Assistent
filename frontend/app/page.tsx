@@ -155,6 +155,86 @@ export default function Home() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
+  const handleEditMessage = async (editedText: string) => {
+    // Find the last user message index
+    let lastUserMessageIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        lastUserMessageIndex = i;
+        break;
+      }
+    }
+
+    if (lastUserMessageIndex === -1) return;
+
+    // Update the user message
+    const updatedMessages = [...messages];
+    updatedMessages[lastUserMessageIndex] = {
+      ...updatedMessages[lastUserMessageIndex],
+      text: editedText,
+      timestamp: new Date()
+    };
+
+    // Remove the assistant's response if it exists (the message after the user message)
+    if (lastUserMessageIndex + 1 < updatedMessages.length && 
+        updatedMessages[lastUserMessageIndex + 1].sender === 'assistant') {
+      updatedMessages.splice(lastUserMessageIndex + 1, 1);
+    }
+
+    setMessages(updatedMessages);
+    setIsLoading(true);
+
+    // Regenerate assistant response
+    try {
+      const response = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: editedText }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
+
+      // Add new assistant response
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response,
+        sender: 'assistant',
+        timestamp: new Date(data.timestamp)
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error regenerating response:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm sorry, I encountered an error. Please try again.",
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Find the last user message index
+  const getLastUserMessageIndex = () => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  const lastUserMessageIndex = getLastUserMessageIndex();
+
   return (
     <main className={styles.main}>
       <div className={styles.chatContainer} ref={chatContainerRef}>
@@ -180,8 +260,13 @@ export default function Home() {
           aria-live="polite"
           aria-atomic="false"
         >
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
+          {messages.map((message, index) => (
+            <ChatMessage 
+              key={message.id} 
+              message={message}
+              isLastUserMessage={index === lastUserMessageIndex}
+              onEdit={index === lastUserMessageIndex ? handleEditMessage : undefined}
+            />
           ))}
           {isLoading && <TypingIndicator />}
           <div ref={messagesEndRef} aria-hidden="true" />
