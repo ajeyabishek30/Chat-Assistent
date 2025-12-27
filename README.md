@@ -4,53 +4,53 @@ A modern, feature-rich web-based chat assistant with a conversational user inter
 
 ## Features
 
-### Core Features [OK]
-- [OK] Chat UI with message input and message display
-- [OK] Users can send messages
-- [OK] Assistant responds using rule-based replies
-- [OK] Chat-style layout (User vs Assistant messages)
-- [OK] Maintains conversation history on the page
-- [OK] Handles empty input gracefully
-- [OK] **Multiple Chat Support**: Create and manage multiple chat conversations
-- [OK] **Chat History Sidebar**: Navigate between different chats easily
-- [OK] **New Chat Functionality**: Start fresh conversations with one click
+### Core Features
+- Chat UI with message input and message display
+- Users can send messages
+- Assistant responds using rule-based replies
+- Chat-style layout (User vs Assistant messages)
+- Maintains conversation history on the page
+- Handles empty input gracefully
+- **Multiple Chat Support**: Create and manage multiple chat conversations
+- **Chat History Sidebar**: Navigate between different chats easily
+- **New Chat Functionality**: Start fresh conversations with one click
 
-### UI/UX Features [UI]
-- [OK] Loading/typing indicator with animated dots
-- [OK] Fully responsive design (mobile, tablet, desktop)
-- [OK] Chat history stored in localStorage
-- [OK] Message timestamps displayed for each message
-- [OK] Smooth animations for message appearance
-- [OK] Beautiful gradient UI design
-- [OK] **Custom Confirmation Modals**: Colorful, themed popups for actions
-- [OK] **Account Modal**: User profile display with logout functionality
-- [OK] **Mobile-Friendly Sidebar**: Hamburger menu for mobile navigation
+### UI/UX Features
+- Loading/typing indicator with animated dots
+- Fully responsive design (mobile, tablet, desktop)
+- Chat history stored in localStorage
+- Message timestamps displayed for each message
+- Smooth animations for message appearance
+- Beautiful gradient UI design
+- **Custom Confirmation Modals**: Colorful, themed popups for actions
+- **Account Modal**: User profile display with logout functionality
+- **Mobile-Friendly Sidebar**: Hamburger menu for mobile navigation
 
-### Advanced Features [ADVANCED]
-- [OK] **Unit Testing**: Jest + React Testing Library
+### Advanced Features
+- **Unit Testing**: Jest + React Testing Library
   - Backend test for empty message error handling
   - Frontend test for message appearing in DOM after send
-- [OK] **Markdown Support**: Full markdown rendering with `react-markdown`
+- **Markdown Support**: Full markdown rendering with `react-markdown`
   - Inline code with syntax highlighting
   - Code blocks
   - Bold, italic, lists, and more
-- [OK] **Theme System**: Three theme modes with CSS variables
+- **Theme System**: Three theme modes with CSS variables
   - Light mode (default)
   - Dark mode
   - Matrix mode (green/black cyberpunk theme)
   - System preference detection
   - Persistent theme selection
   - Smooth transitions
-- [OK] **Accessibility (A11y)**: WCAG compliant
+- **Accessibility (A11y)**: WCAG compliant
   - Proper ARIA labels and roles
   - Keyboard navigation (Enter to send)
   - High color contrast ratios
   - Screen reader support
   - Focus indicators
-- [OK] **Auto-Scroll**: Smooth scroll to bottom on new messages
-- [OK] **Message Editing**: Edit and regenerate responses
-- [OK] **Chat Management**: Delete individual chats with confirmation
-- [OK] **Settings Panel**: Theme switching and account management
+- **Auto-Scroll**: Smooth scroll to bottom on new messages
+- **Message Editing**: Edit and regenerate responses
+- **Chat Management**: Delete individual chats with confirmation
+- **Settings Panel**: Theme switching and account management
 
 ## Tech Stack
 
