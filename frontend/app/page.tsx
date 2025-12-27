@@ -5,6 +5,7 @@ import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
 import ThemeToggle from './components/ThemeToggle';
+import SignInButton from './components/SignInButton';
 import styles from './page.module.css';
 
 export interface Message {
@@ -19,14 +20,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark' | 'matrix'>('light');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Load theme from localStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'matrix' | null;
+    if (savedTheme && ['light', 'dark', 'matrix'].includes(savedTheme)) {
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
@@ -149,10 +150,28 @@ export default function Home() {
   };
 
   const handleThemeToggle = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    let newTheme: 'light' | 'dark' | 'matrix';
+    switch (theme) {
+      case 'light':
+        newTheme = 'dark';
+        break;
+      case 'dark':
+        newTheme = 'matrix';
+        break;
+      case 'matrix':
+        newTheme = 'light';
+        break;
+      default:
+        newTheme = 'light';
+    }
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const handleSignIn = () => {
+    // Placeholder for sign in functionality
+    alert('Sign in functionality would be implemented here');
   };
 
   const handleEditMessage = async (editedText: string) => {
@@ -237,12 +256,17 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      {/* Top-right corner actions */}
+      <div className={styles.topRightActions}>
+        <SignInButton onClick={handleSignIn} />
+        <ThemeToggle theme={theme} onToggle={handleThemeToggle} />
+      </div>
+
       <div className={styles.chatContainer} ref={chatContainerRef}>
         <div className={styles.chatHeader}>
           <h1 className={styles.title}>Chat Assistant</h1>
           <div className={styles.headerActions}>
-            <ThemeToggle theme={theme} onToggle={handleThemeToggle} />
-            <button 
+            <button
               onClick={handleClearHistory}
               className={styles.clearButton}
               title="Clear chat history"

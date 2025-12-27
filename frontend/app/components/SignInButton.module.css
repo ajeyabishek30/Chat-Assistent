@@ -1,79 +1,78 @@
-.themeToggle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+.signInButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
   background: rgba(30, 41, 59, 0.9);
   border: 1px solid rgba(30, 41, 59, 0.8);
   color: white;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
   transition: all 0.2s ease;
-  padding: 0;
   box-shadow: 0 2px 8px rgba(30, 41, 59, 0.2);
 }
 
-.themeToggle:hover {
+.signInButton:hover {
   background: rgba(30, 41, 59, 1);
   border-color: rgba(30, 41, 59, 1);
   box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
   transform: translateY(-1px);
 }
 
-.themeToggle:focus {
+.signInButton:focus {
   outline: 2px solid rgba(30, 41, 59, 0.5);
   outline-offset: 2px;
 }
 
-[data-theme='dark'] .themeToggle {
+.signInButton:active {
+  transform: translateY(0);
+}
+
+[data-theme='dark'] .signInButton {
   background: rgba(71, 85, 105, 0.3);
   border: 1px solid rgba(100, 116, 139, 0.4);
   color: #f1f5f9;
   box-shadow: 0 0 10px rgba(71, 85, 105, 0.2);
 }
 
-[data-theme='dark'] .themeToggle:hover {
+[data-theme='dark'] .signInButton:hover {
   background: rgba(100, 116, 139, 0.4);
   border-color: rgba(148, 163, 184, 0.6);
   box-shadow: 0 0 15px rgba(71, 85, 105, 0.4);
 }
 
-[data-theme='dark'] .themeToggle:focus {
+[data-theme='dark'] .signInButton:focus {
   outline: 2px solid rgba(100, 116, 139, 0.5);
 }
 
-[data-theme='matrix'] .themeToggle {
+[data-theme='matrix'] .signInButton {
   background: rgba(0, 255, 65, 0.1);
   border: 1px solid rgba(0, 255, 65, 0.4);
   color: #00ff41;
   box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
 }
 
-[data-theme='matrix'] .themeToggle:hover {
+[data-theme='matrix'] .signInButton:hover {
   background: rgba(0, 255, 65, 0.2);
   border-color: rgba(0, 255, 65, 0.6);
   box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
 }
 
-[data-theme='matrix'] .themeToggle:focus {
+[data-theme='matrix'] .signInButton:focus {
   outline: 2px solid rgba(0, 255, 65, 0.5);
-}
-
-.themeToggle:active {
-  transform: translateY(0);
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-  .themeToggle {
-    width: 36px;
-    height: 36px;
+  .signInButton {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 
-  .themeToggle svg {
-    width: 18px;
-    height: 18px;
+  .signInButton svg {
+    width: 16px;
+    height: 16px;
   }
 }
-

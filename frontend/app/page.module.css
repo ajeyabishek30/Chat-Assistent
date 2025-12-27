@@ -25,7 +25,14 @@
 }
 
 [data-theme='dark'] .main::before {
-  background-image: 
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(100, 116, 139, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(148, 163, 184, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(71, 85, 105, 0.05) 0%, transparent 50%);
+}
+
+[data-theme='matrix'] .main::before {
+  background-image:
     radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 70%, rgba(57, 255, 20, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 50% 50%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
@@ -59,6 +66,11 @@
 }
 
 [data-theme='dark'] .chatContainer {
+  box-shadow: 0 20px 60px var(--shadow), 0 0 40px rgba(71, 85, 105, 0.2);
+  border: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+[data-theme='matrix'] .chatContainer {
   box-shadow: 0 20px 60px var(--shadow), 0 0 40px rgba(0, 255, 65, 0.2);
   border: 1px solid rgba(0, 255, 65, 0.2);
 }
@@ -86,6 +98,12 @@
 }
 
 [data-theme='dark'] .chatHeader {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 2px 10px var(--shadow-light), 0 0 30px rgba(71, 85, 105, 0.3);
+  border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+[data-theme='matrix'] .chatHeader {
   background: linear-gradient(135deg, #000000 0%, #001a00 100%);
   box-shadow: 0 2px 10px var(--shadow-light), 0 0 30px rgba(0, 255, 65, 0.3);
   border-bottom: 1px solid rgba(0, 255, 65, 0.3);
@@ -117,13 +135,26 @@
 }
 
 [data-theme='dark'] .clearButton {
+  background: rgba(71, 85, 105, 0.3);
+  border: 1px solid rgba(100, 116, 139, 0.4);
+  color: #f1f5f9;
+  box-shadow: 0 0 10px rgba(71, 85, 105, 0.2);
+}
+
+[data-theme='dark'] .clearButton:hover {
+  background: rgba(100, 116, 139, 0.4);
+  border-color: rgba(148, 163, 184, 0.6);
+  box-shadow: 0 0 15px rgba(71, 85, 105, 0.4);
+}
+
+[data-theme='matrix'] .clearButton {
   background: rgba(0, 255, 65, 0.1);
   border: 1px solid rgba(0, 255, 65, 0.4);
   color: #00ff41;
   box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
 }
 
-[data-theme='dark'] .clearButton:hover {
+[data-theme='matrix'] .clearButton:hover {
   background: rgba(0, 255, 65, 0.2);
   border-color: rgba(0, 255, 65, 0.6);
   box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
@@ -144,6 +175,16 @@
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.topRightActions {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 1000;
 }
 
 /* Responsive design */
@@ -170,6 +211,12 @@
     padding: 16px;
     gap: 12px;
   }
+
+  .topRightActions {
+    top: 15px;
+    right: 15px;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -183,6 +230,12 @@
 
   .messagesContainer {
     padding: 12px;
+  }
+
+  .topRightActions {
+    top: 10px;
+    right: 10px;
+    gap: 8px;
   }
 }
 
