@@ -1,70 +1,85 @@
 # Chat Assistant
 
-A simple web-based chat assistant with a conversational user interface built with Next.js and Express.js.
+A modern, feature-rich web-based chat assistant with a conversational user interface built with Next.js and Express.js. Features multiple chat support, sidebar navigation, theme customization, and a beautiful UI.
 
-## 🎯 Features
+## Features
 
-### Required Features ✅
-- ✅ Chat UI with message input and message display
-- ✅ Users can send messages
-- ✅ Assistant responds using rule-based replies
-- ✅ Chat-style layout (User vs Assistant messages)
-- ✅ Maintains conversation history on the page
-- ✅ Handles empty input gracefully
+### Core Features [OK]
+- [OK] Chat UI with message input and message display
+- [OK] Users can send messages
+- [OK] Assistant responds using rule-based replies
+- [OK] Chat-style layout (User vs Assistant messages)
+- [OK] Maintains conversation history on the page
+- [OK] Handles empty input gracefully
+- [OK] **Multiple Chat Support**: Create and manage multiple chat conversations
+- [OK] **Chat History Sidebar**: Navigate between different chats easily
+- [OK] **New Chat Functionality**: Start fresh conversations with one click
 
-### Bonus Features 🎁
-- ✅ Loading/typing indicator with animated dots
-- ✅ Fully responsive design (mobile, tablet, desktop)
-- ✅ Chat history stored in localStorage
-- ✅ Message timestamps displayed for each message
-- ✅ Smooth animations for message appearance
-- ✅ Clear chat history functionality
-- ✅ Beautiful gradient UI design
+### UI/UX Features [UI]
+- [OK] Loading/typing indicator with animated dots
+- [OK] Fully responsive design (mobile, tablet, desktop)
+- [OK] Chat history stored in localStorage
+- [OK] Message timestamps displayed for each message
+- [OK] Smooth animations for message appearance
+- [OK] Beautiful gradient UI design
+- [OK] **Custom Confirmation Modals**: Colorful, themed popups for actions
+- [OK] **Account Modal**: User profile display with logout functionality
+- [OK] **Mobile-Friendly Sidebar**: Hamburger menu for mobile navigation
 
-### Advanced Features 🚀
-- ✅ **Unit Testing**: Jest + React Testing Library
+### Advanced Features [ADVANCED]
+- [OK] **Unit Testing**: Jest + React Testing Library
   - Backend test for empty message error handling
   - Frontend test for message appearing in DOM after send
-- ✅ **Markdown Support**: Full markdown rendering with `react-markdown`
+- [OK] **Markdown Support**: Full markdown rendering with `react-markdown`
   - Inline code with syntax highlighting
   - Code blocks
   - Bold, italic, lists, and more
-- ✅ **Dark/Light Mode Toggle**: Theme switching with CSS variables
+- [OK] **Theme System**: Three theme modes with CSS variables
+  - Light mode (default)
+  - Dark mode
+  - Matrix mode (green/black cyberpunk theme)
   - System preference detection
   - Persistent theme selection
   - Smooth transitions
-- ✅ **Accessibility (A11y)**: WCAG compliant
+- [OK] **Accessibility (A11y)**: WCAG compliant
   - Proper ARIA labels and roles
   - Keyboard navigation (Enter to send)
   - High color contrast ratios
   - Screen reader support
   - Focus indicators
-- ✅ **Auto-Scroll**: Smooth scroll to bottom on new messages
+- [OK] **Auto-Scroll**: Smooth scroll to bottom on new messages
+- [OK] **Message Editing**: Edit and regenerate responses
+- [OK] **Chat Management**: Delete individual chats with confirmation
+- [OK] **Settings Panel**: Theme switching and account management
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 14 (React 18) with TypeScript
 - **Backend**: Node.js & Express.js
 - **Styling**: CSS Modules with responsive design and CSS variables
 - **Storage**: localStorage for chat history persistence
 - **Testing**: Jest + React Testing Library + Supertest
-- **Markdown**: react-markdown for rich text rendering
+- **Markdown**: react-markdown v9 for rich text rendering
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Chat-Assistant/
 ├── frontend/                 # Next.js frontend application
 │   ├── app/
 │   │   ├── components/      # React components
-│   │   │   ├── ChatMessage.tsx
-│   │   │   ├── ChatInput.tsx
-│   │   │   ├── TypingIndicator.tsx
-│   │   │   └── ThemeToggle.tsx
+│   │   │   ├── ChatMessage.tsx          # Individual message component
+│   │   │   ├── ChatInput.tsx            # Message input with send button
+│   │   │   ├── TypingIndicator.tsx      # Loading animation
+│   │   │   ├── ThemeToggle.tsx          # Theme switcher (legacy)
+│   │   │   ├── Sidebar.tsx              # Chat history sidebar
+│   │   │   ├── ConfirmationModal.tsx    # Custom confirmation dialogs
+│   │   │   ├── AccountModal.tsx         # User account modal
+│   │   │   └── SignInButton.tsx        # Sign in button component
 │   │   ├── __tests__/       # Frontend tests
 │   │   │   └── Chat.test.tsx
 │   │   ├── layout.tsx       # Root layout
-│   │   ├── page.tsx         # Main chat page
+│   │   ├── page.tsx         # Main chat page with state management
 │   │   └── globals.css      # Global styles with CSS variables
 │   ├── jest.config.js       # Jest configuration
 │   ├── jest.setup.js        # Jest setup file
@@ -77,10 +92,11 @@ Chat-Assistant/
 │   ├── jest.config.js       # Jest configuration
 │   └── package.json
 ├── package.json             # Root package.json with scripts
+├── vercel.json              # Vercel deployment configuration
 └── README.md
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -148,25 +164,61 @@ npm run dev:frontend
    npm start
    ```
 
-## 🎨 Approach & Logic
+## User Interface
+
+### Sidebar Features
+
+- **New Chat Button**: Create a new conversation instantly
+- **Chat History**: View and navigate between all your conversations
+- **Chat Titles**: Automatically generated from the first user message
+- **Delete Chats**: Remove individual chats with confirmation
+- **Settings Panel**: 
+  - Theme switching (Light/Dark/Matrix)
+  - Account management
+- **Mobile Support**: Collapsible sidebar with hamburger menu
+
+### Chat Features
+
+- **Message Editing**: Edit your last message and regenerate the response
+- **Clear Chat**: Reset current conversation with confirmation
+- **Markdown Rendering**: Rich text support for code, lists, and formatting
+- **Auto-scroll**: Automatically scrolls to latest messages
+- **Timestamps**: See when each message was sent
+
+### Modals & Dialogs
+
+- **Confirmation Modals**: Beautiful, themed popups for:
+  - Clearing chat (warning style)
+  - Deleting chat (danger style)
+- **Account Modal**: View user information and logout
+- **Smooth Animations**: Fade-in overlays and slide-up modals
+
+## Approach & Logic
 
 ### Frontend Architecture
 
 1. **Component Structure**
-   - `page.tsx`: Main chat container managing state and API calls
-   - `ChatMessage.tsx`: Individual message component with user/assistant styling
+   - `page.tsx`: Main chat container managing state, multiple chats, and API calls
+   - `Sidebar.tsx`: Chat history navigation and settings
+   - `ChatMessage.tsx`: Individual message component with user/assistant styling and markdown support
    - `ChatInput.tsx`: Input field with send button and keyboard handling
    - `TypingIndicator.tsx`: Animated loading indicator
+   - `ConfirmationModal.tsx`: Reusable confirmation dialogs
+   - `AccountModal.tsx`: User account information and logout
 
 2. **State Management**
    - Uses React hooks (`useState`, `useEffect`) for local state
-   - Messages stored in component state and synchronized with localStorage
+   - Multiple chats stored in localStorage with unique IDs
+   - Current chat tracked by ID
+   - Messages synchronized with localStorage per chat
    - Auto-scrolls to bottom when new messages arrive
 
 3. **Persistence**
    - Chat history automatically saved to localStorage
+   - Each chat stored separately with metadata (title, timestamps)
    - History restored on page reload
-   - Clear button to reset conversation
+   - Clear button to reset current conversation
+   - Delete button to remove individual chats
 
 4. **User Experience**
    - Empty input validation (prevents sending empty messages)
@@ -174,6 +226,8 @@ npm run dev:frontend
    - Smooth animations for message appearance
    - Responsive design for all screen sizes
    - Timestamps on all messages
+   - Custom modals instead of browser alerts
+   - Mobile-optimized sidebar with overlay
 
 ### Backend Architecture
 
@@ -204,30 +258,33 @@ npm run dev:frontend
 1. **Next.js App Router**: Used modern Next.js 14 with App Router for better performance and developer experience
 2. **TypeScript**: Type safety for better code quality and maintainability
 3. **CSS Modules**: Scoped styling to prevent conflicts
-4. **CSS Variables**: Used for theme switching (dark/light mode) with smooth transitions
+4. **CSS Variables**: Used for theme switching (light/dark/matrix) with smooth transitions
 5. **localStorage**: Simple client-side persistence without database complexity
-6. **Responsive Design**: Mobile-first approach with breakpoints for tablet and desktop
-7. **Animations**: Subtle animations enhance UX without being distracting
-8. **Accessibility First**: WCAG compliant with proper ARIA labels, keyboard navigation, and high contrast ratios
-9. **Markdown Support**: Rich text rendering for better user experience with code examples
-10. **Testing**: Unit tests for critical functionality to ensure reliability
+6. **Multiple Chat Support**: Each chat stored separately for better organization
+7. **Custom Modals**: Replaced browser alerts with styled, themed modals
+8. **Responsive Design**: Mobile-first approach with breakpoints for tablet and desktop
+9. **Animations**: Subtle animations enhance UX without being distracting
+10. **Accessibility First**: WCAG compliant with proper ARIA labels, keyboard navigation, and high contrast ratios
+11. **Markdown Support**: Rich text rendering for better user experience with code examples
+12. **Testing**: Unit tests for critical functionality to ensure reliability
 
-## 🌐 Deployment
+## Deployment
 
-### Frontend (Vercel/Netlify)
+### Frontend (Vercel)
 
-1. **Vercel:**
+The project is configured for Vercel deployment with `vercel.json`:
+
+1. **Vercel Setup:**
+   - Root directory: `frontend`
+   - Build command: `npm run build`
+   - Output directory: `.next`
+   - Set environment variable: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
+
+2. **Deploy:**
    ```bash
    cd frontend
    vercel
    ```
-   Set environment variable: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
-
-2. **Netlify:**
-   - Connect GitHub repository
-   - Build command: `cd frontend && npm run build`
-   - Publish directory: `frontend/.next`
-   - Set environment variable: `NEXT_PUBLIC_API_URL`
 
 ### Backend (Railway/Heroku/Render)
 
@@ -250,7 +307,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 PORT=5000
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 
@@ -281,7 +338,13 @@ npm run test:watch
 
 1. Start the application: `npm run dev`
 2. Open `http://localhost:3000` in your browser
-3. Try sending messages like:
+3. **Test Chat Features:**
+   - Click "New Chat" to create multiple conversations
+   - Send messages in different chats
+   - Switch between chats using the sidebar
+   - Delete a chat and confirm deletion
+   - Clear current chat and confirm
+4. **Test Messages:**
    - "Hello"
    - "How are you?"
    - "What time is it?"
@@ -290,11 +353,15 @@ npm run test:watch
    - "Goodbye"
    - Try markdown: "Try `npm install` to install packages"
    - Try **bold** and *italic* text
-4. Test dark mode toggle
-5. Test keyboard navigation (Enter to send)
-6. Test responsive design on different screen sizes
+5. **Test UI Features:**
+   - Toggle themes in Settings (Light/Dark/Matrix)
+   - Open Account modal and view user info
+   - Test logout functionality
+   - Test mobile responsive design (resize browser)
+   - Test hamburger menu on mobile view
+   - Test keyboard navigation (Enter to send, Escape to cancel edit)
 
-## 📝 API Documentation
+## API Documentation
 
 ### POST /api/chat
 
@@ -335,26 +402,62 @@ Health check endpoint.
 }
 ```
 
-## 🎯 Future Enhancements
+## Key Features Explained
+
+### Multiple Chat Support
+
+- Each chat conversation is stored separately in localStorage
+- Chat titles are automatically generated from the first user message
+- Users can create unlimited chats and switch between them
+- Chats are sorted by most recent activity
+
+### Theme System
+
+- **Light Mode**: Clean, bright interface perfect for daytime use
+- **Dark Mode**: Modern dark theme for reduced eye strain
+- **Matrix Mode**: Cyberpunk-inspired green/black theme
+- Themes persist across sessions
+- System preference detection on first load
+
+### Custom Modals
+
+- Replaced browser `confirm()` dialogs with styled modals
+- Warning style for clearing chats (orange/yellow)
+- Danger style for deleting chats (red)
+- Smooth animations and backdrop blur
+- Click outside to cancel
+
+### Mobile Responsiveness
+
+- Sidebar collapses on mobile devices
+- Hamburger menu button in header
+- Overlay when sidebar is open
+- Touch-friendly buttons and interactions
+- Responsive modal sizing
+
+## Future Enhancements
 
 Potential improvements for production:
-- User authentication
-- Database integration for chat history
+- User authentication and user accounts
+- Database integration for chat history (instead of localStorage)
 - WebSocket support for real-time communication
-- Integration with AI/ML models for smarter responses
+- Integration with AI/ML models (OpenAI, Anthropic, etc.) for smarter responses
 - Multi-language support
-- File upload capabilities
+- File upload capabilities (images, documents)
 - Message search functionality
+- Export chat history (PDF, JSON)
+- Share chat conversations
+- Voice input/output
+- Chat templates and presets
 
-## 📄 License
+## License
 
 MIT License
 
-## 👤 Author
+## Author
 
 Built as part of an interview assessment task.
 
 ---
 
 **Note**: Make sure to update the `NEXT_PUBLIC_API_URL` environment variable when deploying to production to point to your backend server URL.
-
