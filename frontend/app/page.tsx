@@ -5,6 +5,7 @@ import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
 import Sidebar, { Chat } from './components/Sidebar';
+import ConfirmationModal from './components/ConfirmationModal';
 import styles from './page.module.css';
 
 export interface Message {
@@ -31,6 +32,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark' | 'matrix'>('light');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -191,11 +195,18 @@ export default function Home() {
   };
 
   const handleDeleteChat = (chatId: string) => {
+    setChatToDelete(chatId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteChat = () => {
+    if (!chatToDelete) return;
+    
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
         const allChats: ChatData[] = JSON.parse(savedChats);
-        const filteredChats = allChats.filter(chat => chat.id !== chatId);
+        const filteredChats = allChats.filter(chat => chat.id !== chatToDelete);
         
         if (filteredChats.length > 0) {
           localStorage.setItem('chats', JSON.stringify(filteredChats));
@@ -208,7 +219,7 @@ export default function Home() {
           setChats(chatList);
           
           // If deleted chat was current, switch to most recent
-          if (currentChatId === chatId) {
+          if (currentChatId === chatToDelete) {
             const mostRecentChat = filteredChats.reduce((latest, chat) => 
               new Date(chat.updatedAt) > new Date(latest.updatedAt) ? chat : latest
             );
@@ -228,6 +239,9 @@ export default function Home() {
         console.error('Error deleting chat:', error);
       }
     }
+    
+    setShowDeleteModal(false);
+    setChatToDelete(null);
   };
 
   // Auto-scroll to bottom when new messages arrive
@@ -292,15 +306,18 @@ export default function Home() {
   };
 
   const handleClearHistory = () => {
-    if (confirm('Are you sure you want to clear this chat?')) {
-      const greeting: Message = {
-        id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?",
-        sender: 'assistant',
-        timestamp: new Date()
-      };
-      setMessages([greeting]);
-    }
+    setShowClearModal(true);
+  };
+
+  const confirmClearHistory = () => {
+    const greeting: Message = {
+      id: Date.now().toString(),
+      text: "Hello! I'm your chat assistant. How can I help you today?",
+      sender: 'assistant',
+      timestamp: new Date()
+    };
+    setMessages([greeting]);
+    setShowClearModal(false);
   };
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'matrix') => {
@@ -449,6 +466,31 @@ export default function Home() {
 
         <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
       </div>
+
+      <ConfirmationModal
+        isOpen={showClearModal}
+        title="Clear Chat"
+        message="Are you sure you want to clear this chat? This action cannot be undone."
+        confirmText="Clear"
+        cancelText="Cancel"
+        onConfirm={confirmClearHistory}
+        onCancel={() => setShowClearModal(false)}
+        type="warning"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete Chat"
+        message="Are you sure you want to delete this chat? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteChat}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setChatToDelete(null);
+        }}
+        type="danger"
+      />
     </main>
   );
 }
