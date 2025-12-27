@@ -6,6 +6,7 @@ import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
 import Sidebar, { Chat } from './components/Sidebar';
 import ConfirmationModal from './components/ConfirmationModal';
+import AccountModal from './components/AccountModal';
 import styles from './page.module.css';
 
 export interface Message {
@@ -34,7 +35,10 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
+  const [username, setUsername] = useState('DEMO');
+  const [name, setName] = useState('demo name DEMO');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -327,7 +331,26 @@ export default function Home() {
   };
 
   const handleAccountClick = () => {
-    alert('Account settings would be implemented here');
+    setShowAccountModal(true);
+  };
+
+  const handleLogout = () => {
+    // Clear all data
+    localStorage.removeItem('chats');
+    localStorage.removeItem('theme');
+    setChats([]);
+    setMessages([]);
+    setCurrentChatId(null);
+    setShowAccountModal(false);
+    
+    // Create a fresh chat
+    createNewChat();
+    
+    // Reset theme to default
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = prefersDark ? 'dark' : 'light';
+    setTheme(defaultTheme);
+    document.documentElement.setAttribute('data-theme', defaultTheme);
   };
 
   const handleEditMessage = async (editedText: string) => {
@@ -490,6 +513,14 @@ export default function Home() {
           setChatToDelete(null);
         }}
         type="danger"
+      />
+
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        onLogout={handleLogout}
+        username={username}
+        name={name}
       />
     </main>
   );
