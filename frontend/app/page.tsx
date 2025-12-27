@@ -56,7 +56,7 @@ export default function Home() {
       // Initial greeting
       const greeting: Message = {
         id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?\n\nYou can try:\n- `npm install` (markdown code example)\n- **Bold text**\n- *Italic text*",
+        text: "Hello! I'm your chat assistant. How can I help you today?",
         sender: 'assistant',
         timestamp: new Date()
       };
@@ -141,7 +141,7 @@ export default function Home() {
       // Reset with greeting
       const greeting: Message = {
         id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?\n\nYou can try:\n- `npm install` (markdown code example)\n- **Bold text**\n- *Italic text*",
+        text: "Hello! I'm your chat assistant. How can I help you today?",
         sender: 'assistant',
         timestamp: new Date()
       };
