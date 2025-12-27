@@ -450,14 +450,4 @@ Potential improvements for production:
 - Voice input/output
 - Chat templates and presets
 
-## License
 
-MIT License
-
-## Author
-
-Built as part of an interview assessment task.
-
----
-
-**Note**: Make sure to update the `NEXT_PUBLIC_API_URL` environment variable when deploying to production to point to your backend server URL.
