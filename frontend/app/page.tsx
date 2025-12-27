@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
-import ThemeToggle from './components/ThemeToggle';
-import SignInButton from './components/SignInButton';
+import Sidebar, { Chat } from './components/Sidebar';
 import styles from './page.module.css';
 
 export interface Message {
@@ -15,14 +14,40 @@ export interface Message {
   timestamp: Date;
 }
 
+interface ChatData {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function Home() {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark' | 'matrix'>('light');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close sidebar on mobile by default
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth <= 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Load theme from localStorage on mount
   useEffect(() => {
@@ -31,7 +56,6 @@ export default function Home() {
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
-      // Check system preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const initialTheme = prefersDark ? 'dark' : 'light';
       setTheme(initialTheme);
@@ -39,37 +63,172 @@ export default function Home() {
     }
   }, []);
 
-  // Load messages from localStorage on mount
+  // Load chats from localStorage on mount
   useEffect(() => {
-    const savedMessages = localStorage.getItem('chatHistory');
-    if (savedMessages) {
+    const savedChats = localStorage.getItem('chats');
+    if (savedChats) {
       try {
-        const parsed = JSON.parse(savedMessages);
-        setMessages(parsed.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        })));
+        const parsedChats: ChatData[] = JSON.parse(savedChats).map((chat: any) => ({
+          ...chat,
+          createdAt: new Date(chat.createdAt),
+          updatedAt: new Date(chat.updatedAt),
+          messages: chat.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+        
+        const chatList: Chat[] = parsedChats.map(chat => ({
+          id: chat.id,
+          title: chat.title,
+          createdAt: chat.createdAt,
+          updatedAt: chat.updatedAt
+        }));
+        
+        setChats(chatList);
+        
+        // Load the most recent chat or first chat
+        if (parsedChats.length > 0) {
+          const mostRecentChat = parsedChats.reduce((latest, chat) => 
+            chat.updatedAt > latest.updatedAt ? chat : latest
+          );
+          setCurrentChatId(mostRecentChat.id);
+          setMessages(mostRecentChat.messages);
+        } else {
+          // Create initial chat if no chats exist
+          createNewChat();
+        }
       } catch (error) {
-        console.error('Error loading chat history:', error);
+        console.error('Error loading chats:', error);
+        createNewChat();
       }
     } else {
-      // Initial greeting
-      const greeting: Message = {
-        id: Date.now().toString(),
-        text: "Hello! I'm your chat assistant. How can I help you today?",
-        sender: 'assistant',
-        timestamp: new Date()
-      };
-      setMessages([greeting]);
+      // Create initial chat if no chats exist
+      createNewChat();
     }
   }, []);
 
-  // Save messages to localStorage whenever messages change
+  // Save chats to localStorage whenever chats or messages change
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chatHistory', JSON.stringify(messages));
+    if (currentChatId && messages.length > 0) {
+      const savedChats = localStorage.getItem('chats');
+      let allChats: ChatData[] = savedChats ? JSON.parse(savedChats) : [];
+      
+      const chatIndex = allChats.findIndex(chat => chat.id === currentChatId);
+      // Find first user message for title, or use existing title
+      const firstUserMessage = messages.find(msg => msg.sender === 'user');
+      const chatTitle = firstUserMessage 
+        ? firstUserMessage.text.substring(0, 50) 
+        : (chatIndex >= 0 ? allChats[chatIndex].title : 'New Chat');
+      
+      const updatedChat: ChatData = {
+        id: currentChatId,
+        title: chatTitle,
+        messages: messages,
+        createdAt: chatIndex >= 0 ? new Date(allChats[chatIndex].createdAt) : new Date(),
+        updatedAt: new Date()
+      };
+      
+      if (chatIndex >= 0) {
+        allChats[chatIndex] = updatedChat;
+      } else {
+        allChats.push(updatedChat);
+      }
+      
+      // Update chat list
+      const chatList: Chat[] = allChats.map(chat => ({
+        id: chat.id,
+        title: chat.title,
+        createdAt: new Date(chat.createdAt),
+        updatedAt: new Date(chat.updatedAt)
+      }));
+      
+      setChats(chatList);
+      localStorage.setItem('chats', JSON.stringify(allChats));
     }
-  }, [messages]);
+  }, [messages, currentChatId]);
+
+  const createNewChat = () => {
+    const newChatId = Date.now().toString();
+    const greeting: Message = {
+      id: Date.now().toString(),
+      text: "Hello! I'm your chat assistant. How can I help you today?",
+      sender: 'assistant',
+      timestamp: new Date()
+    };
+    
+    setCurrentChatId(newChatId);
+    setMessages([greeting]);
+  };
+
+  const handleNewChat = () => {
+    createNewChat();
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    const savedChats = localStorage.getItem('chats');
+    if (savedChats) {
+      try {
+        const allChats: ChatData[] = JSON.parse(savedChats).map((chat: any) => ({
+          ...chat,
+          createdAt: new Date(chat.createdAt),
+          updatedAt: new Date(chat.updatedAt),
+          messages: chat.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+        
+        const selectedChat = allChats.find(chat => chat.id === chatId);
+        if (selectedChat) {
+          setCurrentChatId(chatId);
+          setMessages(selectedChat.messages);
+        }
+      } catch (error) {
+        console.error('Error loading chat:', error);
+      }
+    }
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    const savedChats = localStorage.getItem('chats');
+    if (savedChats) {
+      try {
+        const allChats: ChatData[] = JSON.parse(savedChats);
+        const filteredChats = allChats.filter(chat => chat.id !== chatId);
+        
+        if (filteredChats.length > 0) {
+          localStorage.setItem('chats', JSON.stringify(filteredChats));
+          const chatList: Chat[] = filteredChats.map(chat => ({
+            id: chat.id,
+            title: chat.title,
+            createdAt: new Date(chat.createdAt),
+            updatedAt: new Date(chat.updatedAt)
+          }));
+          setChats(chatList);
+          
+          // If deleted chat was current, switch to most recent
+          if (currentChatId === chatId) {
+            const mostRecentChat = filteredChats.reduce((latest, chat) => 
+              new Date(chat.updatedAt) > new Date(latest.updatedAt) ? chat : latest
+            );
+            setCurrentChatId(mostRecentChat.id);
+            setMessages(mostRecentChat.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            })));
+          }
+        } else {
+          // If no chats left, create a new one
+          localStorage.removeItem('chats');
+          setChats([]);
+          createNewChat();
+        }
+      } catch (error) {
+        console.error('Error deleting chat:', error);
+      }
+    }
+  };
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -82,10 +241,9 @@ export default function Home() {
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) {
-      return; // Handle empty input gracefully
+      return;
     }
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       text: text.trim(),
@@ -111,7 +269,6 @@ export default function Home() {
         throw new Error(data.error || 'Failed to get response');
       }
 
-      // Add assistant response
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.response,
@@ -135,10 +292,7 @@ export default function Home() {
   };
 
   const handleClearHistory = () => {
-    if (confirm('Are you sure you want to clear the chat history?')) {
-      setMessages([]);
-      localStorage.removeItem('chatHistory');
-      // Reset with greeting
+    if (confirm('Are you sure you want to clear this chat?')) {
       const greeting: Message = {
         id: Date.now().toString(),
         text: "Hello! I'm your chat assistant. How can I help you today?",
@@ -149,33 +303,17 @@ export default function Home() {
     }
   };
 
-  const handleThemeToggle = () => {
-    let newTheme: 'light' | 'dark' | 'matrix';
-    switch (theme) {
-      case 'light':
-        newTheme = 'dark';
-        break;
-      case 'dark':
-        newTheme = 'matrix';
-        break;
-      case 'matrix':
-        newTheme = 'light';
-        break;
-      default:
-        newTheme = 'light';
-    }
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'matrix') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  const handleSignIn = () => {
-    // Placeholder for sign in functionality
-    alert('Sign in functionality would be implemented here');
+  const handleAccountClick = () => {
+    alert('Account settings would be implemented here');
   };
 
   const handleEditMessage = async (editedText: string) => {
-    // Find the last user message index
     let lastUserMessageIndex = -1;
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].sender === 'user') {
@@ -186,7 +324,6 @@ export default function Home() {
 
     if (lastUserMessageIndex === -1) return;
 
-    // Update the user message
     const updatedMessages = [...messages];
     updatedMessages[lastUserMessageIndex] = {
       ...updatedMessages[lastUserMessageIndex],
@@ -194,7 +331,6 @@ export default function Home() {
       timestamp: new Date()
     };
 
-    // Remove the assistant's response if it exists (the message after the user message)
     if (lastUserMessageIndex + 1 < updatedMessages.length && 
         updatedMessages[lastUserMessageIndex + 1].sender === 'assistant') {
       updatedMessages.splice(lastUserMessageIndex + 1, 1);
@@ -203,7 +339,6 @@ export default function Home() {
     setMessages(updatedMessages);
     setIsLoading(true);
 
-    // Regenerate assistant response
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
@@ -219,7 +354,6 @@ export default function Home() {
         throw new Error(data.error || 'Failed to get response');
       }
 
-      // Add new assistant response
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.response,
@@ -242,7 +376,6 @@ export default function Home() {
     }
   };
 
-  // Find the last user message index
   const getLastUserMessageIndex = () => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].sender === 'user') {
@@ -256,14 +389,32 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      {/* Top-right corner actions */}
-      <div className={styles.topRightActions}>
-        <SignInButton onClick={handleSignIn} />
-        <ThemeToggle theme={theme} onToggle={handleThemeToggle} />
-      </div>
+      <Sidebar
+        chats={chats}
+        currentChatId={currentChatId}
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        onDeleteChat={handleDeleteChat}
+        theme={theme}
+        onThemeChange={handleThemeChange}
+        onAccountClick={handleAccountClick}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       <div className={styles.chatContainer} ref={chatContainerRef}>
         <div className={styles.chatHeader}>
+          <button
+            className={styles.menuButton}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
           <h1 className={styles.title}>Chat Assistant</h1>
           <div className={styles.headerActions}>
             <button
@@ -301,4 +452,3 @@ export default function Home() {
     </main>
   );
 }
-

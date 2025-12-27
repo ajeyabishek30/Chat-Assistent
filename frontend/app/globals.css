@@ -17,6 +17,9 @@
   --code-block-bg: #f8fafc;
   --code-block-text: #1e293b;
   --neon-glow: 0 0 10px rgba(0, 0, 0, 0.1);
+  --bg-hover: #f1f5f9;
+  --bg-active: #e2e8f0;
+  --border-hover: #cbd5e1;
 }
 
 [data-theme='dark'] {
@@ -38,6 +41,9 @@
   --code-block-bg: #1e293b;
   --code-block-text: #f1f5f9;
   --neon-glow: 0 0 10px rgba(0, 0, 0, 0.3);
+  --bg-hover: rgba(71, 85, 105, 0.2);
+  --bg-active: rgba(71, 85, 105, 0.3);
+  --border-hover: rgba(100, 116, 139, 0.5);
 }
 
 [data-theme='matrix'] {
@@ -59,6 +65,9 @@
   --code-block-bg: #000000;
   --code-block-text: #00ff41;
   --neon-glow: 0 0 10px rgba(0, 255, 65, 0.6), 0 0 20px rgba(0, 255, 65, 0.4), 0 0 30px rgba(0, 255, 65, 0.3);
+  --bg-hover: rgba(0, 255, 65, 0.1);
+  --bg-active: rgba(0, 255, 65, 0.15);
+  --border-hover: rgba(0, 255, 65, 0.4);
 }
 
 * {
