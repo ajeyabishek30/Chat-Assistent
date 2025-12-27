@@ -110,8 +110,9 @@ export default function ChatMessage({ message, isLastUserMessage = false, onEdit
               {message.sender === 'assistant' ? (
                 <ReactMarkdown
                   components={{
-                    code: ({ node, inline, className, children, ...props }) => {
-                      return inline ? (
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      return isInline ? (
                         <code className={styles.inlineCode} {...props}>
                           {children}
                         </code>
