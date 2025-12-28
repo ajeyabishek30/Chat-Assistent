@@ -6,7 +6,26 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+// Configure CORS to allow requests from Vercel and localhost
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost and Vercel domains
+    if (
+      origin.includes('localhost') ||
+      origin.includes('vercel.app') ||
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+    
+    // Allow all origins for now (can be restricted later)
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Rule-based response logic
