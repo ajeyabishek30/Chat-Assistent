@@ -202,10 +202,72 @@
   color: #00ff41;
 }
 
+.settingsSection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.settingsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settingsLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.themeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.themeOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.themeOption:hover {
+  background: var(--bg-hover);
+}
+
+.themeOption.active {
+  background: var(--bg-active);
+  border-color: var(--border-hover);
+}
+
+[data-theme='dark'] .themeOption.active {
+  background: rgba(71, 85, 105, 0.3);
+  border-color: rgba(100, 116, 139, 0.4);
+}
+
+[data-theme='matrix'] .themeOption.active {
+  background: rgba(0, 255, 65, 0.15);
+  border-color: rgba(0, 255, 65, 0.3);
+}
+
 .modalFooter {
   padding: 16px 24px;
   border-top: 1px solid var(--border-color);
   display: flex;
+  gap: 12px;
   justify-content: flex-end;
 }
 
@@ -243,6 +305,32 @@
   transform: translateY(0);
 }
 
+.changeAccountButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.changeAccountButton:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.changeAccountButton:active {
+  transform: translateY(0);
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .modal {
@@ -277,6 +365,11 @@
     padding: 12px 20px;
   }
 
+  .modalFooter {
+    flex-direction: column;
+  }
+
+  .changeAccountButton,
   .logoutButton {
     width: 100%;
     justify-content: center;
