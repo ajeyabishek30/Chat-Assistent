@@ -6,9 +6,15 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../functions && npm install",
     "build": "npm install && cd frontend && npm install && npm run build",
-    "start": "cd backend && npm start"
+    "start": "cd backend && npm start",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:firestore": "firebase deploy --only firestore",
+    "deploy:hosting": "cd frontend && npm run build && cd .. && firebase deploy --only hosting",
+    "deploy:all": "cd frontend && npm run build && cd .. && firebase deploy",
+    "emulators:start": "firebase emulators:start",
+    "firebase:init": "cd functions && npm install"
   },
   "keywords": ["chat", "assistant", "react", "nextjs", "express"],
   "author": "",

@@ -1,6 +1,14 @@
 # Chat Assistant
 
-A modern, feature-rich web-based chat assistant with a conversational user interface built with Next.js and Express.js. Features multiple chat support, sidebar navigation, theme customization, and a beautiful UI.
+A modern, feature-rich web-based chat assistant with a conversational user interface built with Next.js and Firebase. Features multiple chat support, persistent cloud storage, sidebar navigation, theme customization, and a beautiful UI.
+
+## 🔥 Firebase Integration
+
+This project now uses **Firebase** for:
+- **Backend**: Firebase Cloud Functions (serverless)
+- **Database**: Firestore (NoSQL cloud database)
+- **Hosting**: Firebase Hosting (optional, can use Vercel)
+- **Storage**: Persistent chat history across devices
 
 ## Features
 
@@ -14,11 +22,13 @@ A modern, feature-rich web-based chat assistant with a conversational user inter
 - **Multiple Chat Support**: Create and manage multiple chat conversations
 - **Chat History Sidebar**: Navigate between different chats easily
 - **New Chat Functionality**: Start fresh conversations with one click
+- **Cloud Storage**: Chats saved to Firestore with localStorage fallback
+- **Cross-Device Sync**: Access your chats from any device
 
 ### UI/UX Features
 - Loading/typing indicator with animated dots
 - Fully responsive design (mobile, tablet, desktop)
-- Chat history stored in localStorage
+- Chat history stored in Firestore + localStorage
 - Message timestamps displayed for each message
 - Smooth animations for message appearance
 - Beautiful gradient UI design
@@ -27,6 +37,8 @@ A modern, feature-rich web-based chat assistant with a conversational user inter
 - **Mobile-Friendly Sidebar**: Hamburger menu for mobile navigation
 
 ### Advanced Features
+- **Firebase Backend**: Serverless Cloud Functions
+- **Firestore Database**: Scalable NoSQL database
 - **Unit Testing**: Jest + React Testing Library
   - Backend test for empty message error handling
   - Frontend test for message appearing in DOM after send
@@ -55,9 +67,11 @@ A modern, feature-rich web-based chat assistant with a conversational user inter
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (React 18) with TypeScript
-- **Backend**: Node.js & Express.js
+- **Backend**: Firebase Cloud Functions (Node.js)
+- **Database**: Cloud Firestore (NoSQL)
 - **Styling**: CSS Modules with responsive design and CSS variables
-- **Storage**: localStorage for chat history persistence
+- **Storage**: Firestore + localStorage fallback for offline support
+- **Hosting**: Firebase Hosting (or Vercel for frontend)
 - **Testing**: Jest + React Testing Library + Supertest
 - **Markdown**: react-markdown v9 for rich text rendering
 
@@ -81,18 +95,33 @@ Chat-Assistant/
 │   │   ├── layout.tsx       # Root layout
 │   │   ├── page.tsx         # Main chat page with state management
 │   │   └── globals.css      # Global styles with CSS variables
+│   ├── lib/                 # Firebase & API utilities
+│   │   ├── firebase.ts      # Firebase client configuration
+│   │   └── api.ts           # API service layer
+│   ├── .env.local           # Environment variables (Firebase config)
+│   ├── .env.example         # Environment variables template
 │   ├── jest.config.js       # Jest configuration
 │   ├── jest.setup.js        # Jest setup file
 │   ├── package.json
 │   └── next.config.js
-├── backend/                  # Express.js backend API
+├── backend/                  # Express.js backend (legacy)
 │   ├── __tests__/           # Backend tests
 │   │   └── server.test.js
 │   ├── server.js            # Main server file
 │   ├── jest.config.js       # Jest configuration
 │   └── package.json
-├── package.json             # Root package.json with scripts
-├── vercel.json              # Vercel deployment configuration
+├── functions/               # Firebase Cloud Functions (NEW)
+│   ├── index.js            # Cloud Functions (chat, saveChat, etc.)
+│   ├── package.json        # Functions dependencies
+│   └── .eslintrc.js        # ESLint configuration
+├── firebase.json           # Firebase configuration
+├── .firebaserc            # Firebase project reference
+├── firestore.rules        # Firestore security rules
+├── firestore.indexes.json # Firestore indexes
+├── package.json           # Root package.json with scripts
+├── vercel.json            # Vercel deployment configuration
+├── FIREBASE_SETUP.md      # Detailed Firebase setup guide
+├── DEPLOY.md              # Quick deployment guide
 └── README.md
 ```
 
@@ -102,6 +131,7 @@ Chat-Assistant/
 
 - Node.js (v18 or higher)
 - npm or yarn
+- Firebase CLI: `npm install -g firebase-tools`
 
 ### Installation
 
@@ -116,16 +146,55 @@ Chat-Assistant/
    npm run install:all
    ```
    
-   Or install manually:
+   This will install dependencies for:
+   - Root project
+   - Backend (legacy Express server)
+   - Frontend (Next.js)
+   - Functions (Firebase Cloud Functions)
+
+3. **Configure Firebase**
+   
+   Get your Firebase configuration from [Firebase Console](https://console.firebase.google.com/project/chat-assistant-6112c/settings/general):
+   
    ```bash
-   npm install
-   cd backend && npm install
-   cd ../frontend && npm install
+   # Copy the example environment file
+   cp frontend/.env.example frontend/.env.local
+   
+   # Edit frontend/.env.local and add your Firebase config
    ```
 
 ### Running the Application
 
-#### Development Mode (Recommended)
+#### Option 1: Firebase (Recommended for Production)
+
+1. **Login to Firebase**
+   ```bash
+   firebase login
+   ```
+
+2. **Deploy to Firebase**
+   ```bash
+   npm run deploy:all
+   ```
+   
+   Your app will be live at: `https://chat-assistant-6112c.web.app`
+
+#### Option 2: Local Development with Firebase Emulators
+
+```bash
+# Terminal 1: Start Firebase emulators
+npm run emulators:start
+
+# Terminal 2: Start frontend
+cd frontend
+npm run dev
+```
+
+This will start:
+- Firebase Emulators on various ports
+- Frontend development server on `http://localhost:3000`
+
+#### Option 3: Development Mode (Legacy Backend)
 
 Run both frontend and backend concurrently:
 
@@ -278,34 +347,69 @@ The project is configured for Vercel deployment with `vercel.json`:
    - Root directory: `frontend`
    - Build command: `npm run build`
    - Output directory: `.next`
-   - Set environment variable: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
+## Deployment
 
-2. **Deploy:**
+### Firebase Deployment (Recommended)
+
+Full Firebase deployment with Cloud Functions, Firestore, and Hosting:
+
+```bash
+# Deploy everything
+npm run deploy:all
+```
+
+Or deploy components separately:
+
+```bash
+# Deploy backend functions
+npm run deploy:functions
+
+# Deploy Firestore rules and indexes
+npm run deploy:firestore
+
+# Build and deploy frontend hosting
+npm run deploy:hosting
+```
+
+**Your app will be live at:**
+- https://chat-assistant-6112c.web.app
+- https://chat-assistant-6112c.firebaseapp.com
+
+See [DEPLOY.md](./DEPLOY.md) for quick deployment guide or [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed documentation.
+
+### Vercel + Firebase (Hybrid)
+
+Deploy frontend to Vercel while using Firebase for backend:
+
+1. **Deploy Firebase Functions:**
+   ```bash
+   firebase deploy --only functions,firestore
+   ```
+
+2. **Deploy Frontend to Vercel:**
    ```bash
    cd frontend
    vercel
    ```
 
-### Backend (Railway/Heroku/Render)
-
-1. **Railway/Heroku/Render:**
-   - Connect GitHub repository
-   - Set root directory to `backend`
-   - Install command: `npm install`
-   - Start command: `npm start`
-   - Set PORT environment variable (usually auto-assigned)
+3. **Set Environment Variables in Vercel:**
+   - Add all variables from `frontend/.env.example`
+   - `NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL` should point to your deployed functions
 
 ### Environment Variables
 
 **Frontend (.env.local):**
-```
-NEXT_PUBLIC_API_URL=http://localhost:5000
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=chat-assistant-6112c.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=chat-assistant-6112c
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=chat-assistant-6112c.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL=https://us-central1-chat-assistant-6112c.cloudfunctions.net
 ```
 
-**Backend (.env):**
-```
-PORT=5000
-```
+Get these values from [Firebase Console](https://console.firebase.google.com/project/chat-assistant-6112c/settings/general).
 
 ## Testing
 

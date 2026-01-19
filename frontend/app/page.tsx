@@ -8,6 +8,7 @@ import Sidebar, { Chat } from './components/Sidebar';
 import AccountModal from './components/AccountModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import styles from './page.module.css';
+import { sendChatMessage, saveChat, loadChat, listChats, deleteChat as deleteFirebaseChat } from '../lib/api';
 
 export interface Message {
   id: string;
@@ -23,6 +24,16 @@ interface ChatData {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Generate a simple session ID for anonymous users
+const getSessionId = () => {
+  let sessionId = localStorage.getItem('sessionId');
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('sessionId', sessionId);
+  }
+  return sessionId;
+};
 
 // Get API URL and ensure it has https:// prefix if it's a production URL
 const getApiUrl = () => {
@@ -126,6 +137,8 @@ export default function Home() {
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const [username, setUsername] = useState('demo30');
   const [name, setName] = useState('DEMO');
+  const [sessionId] = useState(getSessionId());
+  const [isSyncing, setIsSyncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -158,88 +171,184 @@ export default function Home() {
     }
   }, []);
 
-  // Load chats from localStorage on mount
+  // Load chats from Firebase on mount
   useEffect(() => {
-    const savedChats = localStorage.getItem('chats');
-    if (savedChats) {
+    const loadChatsFromFirebase = async () => {
       try {
-        const parsedChats: ChatData[] = JSON.parse(savedChats).map((chat: any) => ({
-          ...chat,
-          createdAt: new Date(chat.createdAt),
-          updatedAt: new Date(chat.updatedAt),
-          messages: chat.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp)
-          }))
-        }));
+        setIsSyncing(true);
+        const response = await listChats(undefined, sessionId);
         
-        const chatList: Chat[] = parsedChats.map(chat => ({
-          id: chat.id,
-          title: chat.title,
-          createdAt: chat.createdAt,
-          updatedAt: chat.updatedAt
-        }));
-        
-        setChats(chatList);
-        
-        // Load the most recent chat or first chat
-        if (parsedChats.length > 0) {
-          const mostRecentChat = parsedChats.reduce((latest, chat) => 
-            chat.updatedAt > latest.updatedAt ? chat : latest
-          );
-          setCurrentChatId(mostRecentChat.id);
-          setMessages(mostRecentChat.messages);
+        if (response.success && response.chats.length > 0) {
+          const chatList: Chat[] = response.chats.map(chat => ({
+            id: chat.id,
+            title: chat.title,
+            createdAt: chat.createdAt ? new Date(chat.createdAt) : new Date(),
+            updatedAt: chat.updatedAt ? new Date(chat.updatedAt) : new Date()
+          }));
+          
+          setChats(chatList);
+          
+          // Load the most recent chat
+          const mostRecentChatId = response.chats[0].id;
+          const chatResponse = await loadChat(mostRecentChatId);
+          
+          if (chatResponse.success) {
+            setCurrentChatId(mostRecentChatId);
+            setMessages(chatResponse.chat.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            })));
+          } else {
+            createNewChat();
+          }
+        } else {
+          // Fallback to localStorage if Firebase fails
+          const savedChats = localStorage.getItem('chats');
+          if (savedChats) {
+            try {
+              const parsedChats: ChatData[] = JSON.parse(savedChats).map((chat: any) => ({
+                ...chat,
+                createdAt: new Date(chat.createdAt),
+                updatedAt: new Date(chat.updatedAt),
+                messages: chat.messages.map((msg: any) => ({
+                  ...msg,
+                  timestamp: new Date(msg.timestamp)
+                }))
+              }));
+              
+              const chatList: Chat[] = parsedChats.map(chat => ({
+                id: chat.id,
+                title: chat.title,
+                createdAt: chat.createdAt,
+                updatedAt: chat.updatedAt
+              }));
+              
+              setChats(chatList);
+              
+              if (parsedChats.length > 0) {
+                const mostRecentChat = parsedChats.reduce((latest, chat) => 
+                  chat.updatedAt > latest.updatedAt ? chat : latest
+                );
+                setCurrentChatId(mostRecentChat.id);
+                setMessages(mostRecentChat.messages);
+              } else {
+                createNewChat();
+              }
+            } catch (error) {
+              console.error('Error loading chats from localStorage:', error);
+              createNewChat();
+            }
+          } else {
+            createNewChat();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chats from Firebase:', error);
+        // Fallback to localStorage
+        const savedChats = localStorage.getItem('chats');
+        if (savedChats) {
+          try {
+            const parsedChats: ChatData[] = JSON.parse(savedChats).map((chat: any) => ({
+              ...chat,
+              createdAt: new Date(chat.createdAt),
+              updatedAt: new Date(chat.updatedAt),
+              messages: chat.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp)
+              }))
+            }));
+            
+            const chatList: Chat[] = parsedChats.map(chat => ({
+              id: chat.id,
+              title: chat.title,
+              createdAt: chat.createdAt,
+              updatedAt: chat.updatedAt
+            }));
+            
+            setChats(chatList);
+            
+            if (parsedChats.length > 0) {
+              const mostRecentChat = parsedChats.reduce((latest, chat) => 
+                chat.updatedAt > latest.updatedAt ? chat : latest
+              );
+              setCurrentChatId(mostRecentChat.id);
+              setMessages(mostRecentChat.messages);
+            } else {
+              createNewChat();
+            }
+          } catch (error) {
+            console.error('Error loading chats:', error);
+            createNewChat();
+          }
         } else {
           createNewChat();
         }
-      } catch (error) {
-        console.error('Error loading chats:', error);
-        createNewChat();
+      } finally {
+        setIsSyncing(false);
       }
-    } else {
-      createNewChat();
-    }
+    };
+
+    loadChatsFromFirebase();
   }, []);
 
-  // Save chats to localStorage whenever chats or messages change
+  // Save chats to Firebase and localStorage whenever chats or messages change
   useEffect(() => {
     if (currentChatId && messages.length > 0) {
-      const savedChats = localStorage.getItem('chats');
-      let allChats: ChatData[] = savedChats ? JSON.parse(savedChats) : [];
-      
-      const chatIndex = allChats.findIndex(chat => chat.id === currentChatId);
-      // Find first user message for title, or use existing title
-      const firstUserMessage = messages.find(msg => msg.sender === 'user');
-      const chatTitle = firstUserMessage 
-        ? firstUserMessage.text.substring(0, 50) 
-        : (chatIndex >= 0 ? allChats[chatIndex].title : 'New Chat');
-      
-      const updatedChat: ChatData = {
-        id: currentChatId,
-        title: chatTitle,
-        messages: messages,
-        createdAt: chatIndex >= 0 ? new Date(allChats[chatIndex].createdAt) : new Date(),
-        updatedAt: new Date()
+      const saveChatData = async () => {
+        // Save to localStorage first (immediate)
+        const savedChats = localStorage.getItem('chats');
+        let allChats: ChatData[] = savedChats ? JSON.parse(savedChats) : [];
+        
+        const chatIndex = allChats.findIndex(chat => chat.id === currentChatId);
+        const firstUserMessage = messages.find(msg => msg.sender === 'user');
+        const chatTitle = firstUserMessage 
+          ? firstUserMessage.text.substring(0, 50) 
+          : (chatIndex >= 0 ? allChats[chatIndex].title : 'New Chat');
+        
+        const updatedChat: ChatData = {
+          id: currentChatId,
+          title: chatTitle,
+          messages: messages,
+          createdAt: chatIndex >= 0 ? new Date(allChats[chatIndex].createdAt) : new Date(),
+          updatedAt: new Date()
+        };
+        
+        if (chatIndex >= 0) {
+          allChats[chatIndex] = updatedChat;
+        } else {
+          allChats.push(updatedChat);
+        }
+        
+        const chatList: Chat[] = allChats.map(chat => ({
+          id: chat.id,
+          title: chat.title,
+          createdAt: new Date(chat.createdAt),
+          updatedAt: new Date(chat.updatedAt)
+        }));
+        
+        setChats(chatList);
+        localStorage.setItem('chats', JSON.stringify(allChats));
+
+        // Save to Firebase (async)
+        try {
+          await saveChat({
+            chatId: currentChatId,
+            title: chatTitle,
+            messages: messages.map(msg => ({
+              ...msg,
+              timestamp: msg.timestamp.toISOString()
+            })),
+            sessionId: sessionId
+          });
+        } catch (error) {
+          console.error('Error saving to Firebase:', error);
+          // Continue with local storage only
+        }
       };
-      
-      if (chatIndex >= 0) {
-        allChats[chatIndex] = updatedChat;
-      } else {
-        allChats.push(updatedChat);
-      }
-      
-      // Update chat list
-      const chatList: Chat[] = allChats.map(chat => ({
-        id: chat.id,
-        title: chat.title,
-        createdAt: new Date(chat.createdAt),
-        updatedAt: new Date(chat.updatedAt)
-      }));
-      
-      setChats(chatList);
-      localStorage.setItem('chats', JSON.stringify(allChats));
+
+      saveChatData();
     }
-  }, [messages, currentChatId]);
+  }, [messages, currentChatId, sessionId]);
 
   const createNewChat = () => {
     const newChatId = Date.now().toString();
@@ -258,7 +367,23 @@ export default function Home() {
     createNewChat();
   };
 
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = async (chatId: string) => {
+    try {
+      // Try loading from Firebase first
+      const response = await loadChat(chatId);
+      if (response.success) {
+        setCurrentChatId(chatId);
+        setMessages(response.chat.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })));
+        return;
+      }
+    } catch (error) {
+      console.error('Error loading chat from Firebase:', error);
+    }
+
+    // Fallback to localStorage
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
@@ -288,9 +413,17 @@ export default function Home() {
     setShowDeleteModal(true);
   };
 
-  const confirmDeleteChat = () => {
+  const confirmDeleteChat = async () => {
     if (!chatToDelete) return;
     
+    // Delete from Firebase first
+    try {
+      await deleteFirebaseChat(chatToDelete);
+    } catch (error) {
+      console.error('Error deleting from Firebase:', error);
+    }
+
+    // Delete from localStorage
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
@@ -362,20 +495,7 @@ export default function Home() {
     const minLoadingTime = 800;
 
     try {
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: text.trim() }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await sendChatMessage(text.trim());
 
       // Ensure minimum loading time for better UX
       const elapsed = Date.now() - startTime;
@@ -393,37 +513,23 @@ export default function Home() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
       console.error('Error sending message:', error);
-      console.error('API URL:', API_URL);
       
       // Ensure minimum loading time even on error
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(minLoadingTime - elapsed, 600);
       await new Promise(resolve => setTimeout(resolve, remainingTime));
       
-      // If backend is not available, use fallback response
-      if (error.message?.includes('Failed to fetch') || 
-          error.message?.includes('NetworkError') || 
-          error.name === 'TypeError' ||
-          error.message?.includes('Network request failed')) {
-        const fallbackResponse = generateFallbackResponse(text.trim());
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: fallbackResponse,
-          sender: 'assistant',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: `Error: ${error.message || 'Unable to connect to the server. Please check your connection.'}`,
-          sender: 'assistant',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      }
+      // Use fallback response for network errors
+      const fallbackResponse = generateFallbackResponse(text.trim());
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: fallbackResponse,
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -500,19 +606,7 @@ export default function Home() {
     const minLoadingTime = 800;
 
     try {
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: editedText }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
-      }
+      const data = await sendChatMessage(editedText);
 
       const elapsed = Date.now() - startTime;
       if (elapsed < minLoadingTime) {
@@ -534,28 +628,16 @@ export default function Home() {
       const remainingTime = Math.max(minLoadingTime - elapsed, 600);
       await new Promise(resolve => setTimeout(resolve, remainingTime));
       
-      if (error.message?.includes('Failed to fetch') || 
-          error.message?.includes('NetworkError') || 
-          error.name === 'TypeError') {
-        const fallbackResponse = generateFallbackResponse(editedText.trim());
-        
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: fallbackResponse,
-          sender: 'assistant',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "I'm sorry, I encountered an error. Please try again.",
-          sender: 'assistant',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      }
+      const fallbackResponse = generateFallbackResponse(editedText.trim());
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: fallbackResponse,
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
     } finally {
       setIsLoading(false);
     }
