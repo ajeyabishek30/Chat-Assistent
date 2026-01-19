@@ -27,6 +27,7 @@ interface ChatData {
 
 // Generate a simple session ID for anonymous users
 const getSessionId = () => {
+  if (typeof window === 'undefined') return '';
   let sessionId = localStorage.getItem('sessionId');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -159,6 +160,8 @@ export default function Home() {
 
   // Load theme from localStorage on mount
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'matrix' | null;
     if (savedTheme && ['light', 'dark', 'matrix'].includes(savedTheme)) {
       setTheme(savedTheme);
@@ -203,6 +206,10 @@ export default function Home() {
           }
         } else {
           // Fallback to localStorage if Firebase fails
+          if (typeof window === 'undefined') {
+            createNewChat();
+            return;
+          }
           const savedChats = localStorage.getItem('chats');
           if (savedChats) {
             try {
@@ -245,6 +252,10 @@ export default function Home() {
       } catch (error) {
         console.error('Error loading chats from Firebase:', error);
         // Fallback to localStorage
+        if (typeof window === 'undefined') {
+          createNewChat();
+          return;
+        }
         const savedChats = localStorage.getItem('chats');
         if (savedChats) {
           try {
@@ -296,6 +307,8 @@ export default function Home() {
     if (currentChatId && messages.length > 0) {
       const saveChatData = async () => {
         // Save to localStorage first (immediate)
+        if (typeof window === 'undefined') return;
+        
         const savedChats = localStorage.getItem('chats');
         let allChats: ChatData[] = savedChats ? JSON.parse(savedChats) : [];
         
@@ -384,6 +397,8 @@ export default function Home() {
     }
 
     // Fallback to localStorage
+    if (typeof window === 'undefined') return;
+    
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
@@ -424,6 +439,8 @@ export default function Home() {
     }
 
     // Delete from localStorage
+    if (typeof window === 'undefined') return;
+    
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
@@ -552,7 +569,9 @@ export default function Home() {
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'matrix') => {
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+    }
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
@@ -561,8 +580,10 @@ export default function Home() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('chats');
-    localStorage.removeItem('theme');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('chats');
+      localStorage.removeItem('theme');
+    }
     setChats([]);
     setMessages([]);
     setCurrentChatId(null);
